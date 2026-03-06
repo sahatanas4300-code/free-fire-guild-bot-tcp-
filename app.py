@@ -3759,7 +3759,7 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                             footer ="""[00FFFA]╔═•══•════════════════•══•═╗
 [FF1493]║ ⚡ [B][FFFF00]ROBOT INFO[FFFF00][/B] ⚡
 [00FFFA]║
-[FFFF00]║ 👤 Developer    :: [FF1493] SM
+[FFFF00]║ 👤 Developer    ::[FF1493] Anas (SPIDER)
 [32CD32]║ 💻 Status        :: [32CD32]ONLINE
 [1E90FF]║ 🛠 Version      :: [1E90FF]ALL IN ONE
 [00FFFA]╚═•══•════════════════•══•═╝"""
@@ -3789,7 +3789,7 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
 
 
 async def MaiiiinE():
-    Uid , Pw = '4395389733','7C0E5CE272A2CA70347433F90734E22677537639DAF964716A66127679ADF4C5'
+    Uid , Pw = '4594650572','613E476BB3708A0162637547ED62E058FF637113CE4E555A901D1ED00197BDE3'
     
 
     open_id , access_token = await GeNeRaTeAccEss(Uid , Pw)
