@@ -985,7 +985,22 @@ async def banecipher(client_id, key, iv):
     banner_text = f"""
 .
 .
-.
+.# --- Anas (SPIDER) Command Control ---
+if inPuTMsG.strip().startswith('/anas_glory'):
+    if not glory_running:
+        glory_running = True
+        # সিএস লুপটি ব্যাকগ্রাউন্ডে শুরু হবে
+        glory_task = asyncio.create_task(anas_spider_glory_booster())
+        await safe_send_message(response.Data.chat_type, "🚀 SPIDER Glory Loop: STARTED (16 IDs Active)", uid, chat_id, key, iv)
+    else:
+        await safe_send_message(response.Data.chat_type, "⚠️ Loop is already running, Mama!", uid, chat_id, key, iv)
+
+elif inPuTMsG.strip() == '/stop_glory':
+    glory_running = False
+    if glory_task:
+        glory_task.cancel()
+    await safe_send_message(response.Data.chat_type, "🛑 SPIDER Glory Loop: STOPPED Successfully", uid, chat_id, key, iv)
+
 .
 .
 .
