@@ -58,7 +58,9 @@ async def anas_spider_glory_booster():
         if not accounts_data:
             print("❌ Error: accounts.json is empty or not found!")
             return
-    except Exception as e: return
+    except Exception as e: 
+        print(f"❌ Error loading accounts: {e}")
+        return
 
     print("⏳ Auto Glory Farm waiting 10 seconds for main bot to stabilize...")
     await asyncio.sleep(10)
@@ -2126,9 +2128,11 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
             while True:
                 data2 = await reader.read(9999)
                     
-                if not data2: 
+                                if not data2: 
                     print("Connection closed by the server.")
+                    await asyncio.sleep(5)  # এই লাইনটি যোগ করুন
                     break
+
                     
                 data_hex = data2.hex()
                 
@@ -2404,7 +2408,10 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                 if whisper_writer: whisper_writer.write(pK) ; await whisper_writer.drain()
             while True:
                 data = await reader.read(9999)
-                if not data: break
+                                if not data: 
+                    print("⚠️ Connection closed. Waiting 5s...")
+                    await asyncio.sleep(5)
+                    break
                 
                 if data.hex().startswith("120000"):
 
