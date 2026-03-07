@@ -2102,7 +2102,8 @@ async def ArohiAccepted(uid,code,K,V):
         }
     return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex() , '0515' , K , V)
 
-async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
+async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=5.0):
+
     global online_writer, last_status_packet, status_response_cache, insquad, joining_team, whisper_writer, region
     
     if insquad is not None:
@@ -2128,11 +2129,11 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen, reconnect_delay=0.5):
             # --- READING LOOP ---
             while True:
                 data2 = await reader.read(9999)
-                    
-                                if not data2: 
-                    print("Connection closed by the server.")
-                    await asyncio.sleep(5)  # এই লাইনটি যোগ করুন
+                if not data2: 
+                    print("⚠️ Connection closed. Waiting 5s before reconnect...")
+                    await asyncio.sleep(5) # এই স্লিপটি অবশ্যই থাকতে হবে
                     break
+
 
                     
                 data_hex = data2.hex()
@@ -2398,21 +2399,16 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
             bytes_payload = bytes.fromhex(AutHToKen)
             whisper_writer.write(bytes_payload)
             await whisper_writer.drain()
-            ready_event.set()
-            if LoGinDaTaUncRypTinG.Clan_ID:
-                clan_id = LoGinDaTaUncRypTinG.Clan_ID
-                clan_compiled_data = LoGinDaTaUncRypTinG.Clan_Compiled_Data
-                print('\n - TarGeT BoT in CLan ! ')
-                print(f' - Clan Uid > {clan_id}')
-                print(f' - BoT ConnEcTed WiTh CLan ChaT SuccEssFuLy ! ')
+            ready_event.set()          
                 pK = await AuthClan(clan_id , clan_compiled_data , key , iv)
                 if whisper_writer: whisper_writer.write(pK) ; await whisper_writer.drain()
             while True:
                 data = await reader.read(9999)
-                                if not data: 
-                    print("⚠️ Connection closed. Waiting 5s...")
-                    await asyncio.sleep(5)
+                if not data: 
+                    print("⚠️ Connection closed. Waiting 5s before reconnect...")
+                    await asyncio.sleep(5) # এই লাইনটি নিশ্চিত করুন
                     break
+
                 
                 if data.hex().startswith("120000"):
 
