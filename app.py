@@ -14,8 +14,8 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
 # --- SPIDER Configuration (Anas Bhai - Abu Dhabi) ---
-CLAN_ID = "3063703446" # আপনার ক্ল্যান আইডি
-BOT_UID = "14942629274" # আপনার লগইন আইডি
+CLAN_ID = "3063703446" 
+BOT_UID = "14942629274" 
 PW = '613E476BB3708A0162637547ED62E058FF637113CE4E555A901D1ED00197BDE3'
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -44,53 +44,77 @@ class MultiAccountManager:
 
 multi_account_manager = MultiAccountManager()
 
-# --- অটো-স্টার্ট গ্লোরি বুস্টার লজিক (Anas Edition) ---
-async def anas_spider_glory_booster(key, iv, region):
+# --- অটো-স্টার্ট গ্লোরি বুস্টার লজিক (REAL LOGIN EDITION) ---
+async def anas_spider_glory_booster():
     global glory_running
-    print(f"\n🚀 [SPIDER AUTO-START] 16-ID Glory Farm Activated for Clan: {CLAN_ID}")
+    print(f"\n🚀 [SPIDER AUTO-START] 16-ID REAL Glory Farm Activated for Clan: {CLAN_ID}")
     
     try:
+        # ১০০টা আইডি থেকে প্রথম ১৬টা আইডি নেবে
         accounts_data = multi_account_manager.load_accounts()
-        uids = list(accounts_data.keys())[:16] # আপনার লিস্টের ১৬টি আইডি
+        account_items = list(accounts_data.items())[:16] 
     except Exception as e: 
         print(f"❌ accounts.json error: {e}")
         return
 
-    print("⏳ Sending Guild Requests...")
-    # ধাপ ১: গিল্ড জয়েন রিকোয়েস্ট পাঠানো
-    for target_uid in uids:
-        if not glory_running: break
-        try:
-            req_packet = await SEnd_InV(5, int(target_uid), key, iv, region) 
-            await SEndPacKeT(whisper_writer, online_writer, 'OnLine', req_packet)
-            print(f"✅ Request Sent to: {target_uid}")
-        except: pass
-        await asyncio.sleep(1.5)
-
-    print("🔥 Starting Auto CS Match Loop (1 Minute Gap)...")
-    # ধাপ ২: ৪টি গ্রুপে ভাগ করে সিএস (CS) ম্যাচ লুপ শুরু
-    while glory_running: 
-        for i in range(0, 16, 4):
+    while glory_running:
+        print(f"\n🔄 Starting new CS Match Cycle for 16 IDs...")
+        
+        for uid, password in account_items:
             if not glory_running: break
-            squad_uids = uids[i:i+4]
-            leader_uid = squad_uids[0]
             
+            print(f"🔐 Logging into ID: {uid}...")
             try:
-                p = await OpEnSq(key, iv, region)
-                await SEndPacKeT(whisper_writer, online_writer, 'OnLine', p)
+                # ১. রিয়েল লগইন প্রসেস
+                open_id, access_token = await GeNeRaTeAccEss(uid, password)
+                if not open_id: 
+                    print(f"❌ Login failed for {uid}")
+                    continue
                 
-                c = await cHSq(4, int(leader_uid), key, iv, region)
-                await SEndPacKeT(whisper_writer, online_writer, 'OnLine', c)
+                PyL = await EncRypTMajoRLoGin(open_id, access_token)
+                res = await MajorLogin(PyL)
+                if not res: continue
                 
-                s = await FS(key, iv) 
-                await SEndPacKeT(whisper_writer, online_writer, 'OnLine', s)
-                print(f"🎮 Group {int(i/4)+1} Started. Leader: {leader_uid}")
+                auth = await DecRypTMajoRLoGin(res)
+                LoGinDaTa = await GetLoginData(auth.url, PyL, auth.token)
+                dec_data = await DecRypTLoGinDaTa(LoGinDaTa)
+                
+                OnLineiP, OnLineporT = dec_data.Online_IP_Port.split(":")
+                AutHToKen = await xAuThSTarTuP(int(auth.account_uid), auth.token, int(auth.timestamp), auth.key, auth.iv)
+                
+                # ২. আলাদা কানেকশন তৈরি
+                reader, slave_writer = await asyncio.open_connection(OnLineiP, int(OnLineporT))
+                slave_writer.write(bytes.fromhex(AutHToKen))
+                await slave_writer.drain()
+                await asyncio.sleep(2) # সার্ভারে ঢোকার জন্য সময়
+                
+                # ৩. স্কোয়াড তৈরি ও স্টার্ট
+                p = await OpEnSq(auth.key, auth.iv, auth.region)
+                slave_writer.write(p); await slave_writer.drain()
+                await asyncio.sleep(0.5)
+                
+                c = await cHSq(4, int(auth.account_uid), auth.key, auth.iv, auth.region)
+                slave_writer.write(c); await slave_writer.drain()
+                await asyncio.sleep(0.5)
+                
+                s = await FS(auth.key, auth.iv) 
+                slave_writer.write(s); await slave_writer.drain()
+                
+                print(f"🎮 Match Started Successfully for UID: {uid}")
+                
+                # ৪. কাজ শেষে কানেকশন ক্লোজ
+                slave_writer.close()
+                await slave_writer.wait_closed()
+                
             except Exception as e:
-                print(f"⚠️ Start error: {e}")
+                print(f"⚠️ Error with UID {uid}: {e}")
             
-            # আপনার রিকোয়েস্ট অনুযায়ী ১ মিনিটের (৬০ সেকেন্ড) বিরতি
-            print(f"🕒 Waiting 60 seconds (Anas Request Gap)...")
-            await asyncio.sleep(60)
+            # একটি আইডি স্টার্ট দেওয়ার পর ৫ সেকেন্ড গ্যাপ
+            await asyncio.sleep(5)
+            
+        # ১৬টি আইডির কাজ শেষ হলে ১ মিনিটের বড় গ্যাপ
+        print(f"🕒 16 IDs processed! Waiting 60 seconds before next round...")
+        await asyncio.sleep(60)
 
 # --- নেটওয়ার্কিং ও হেল্পার ফাংশনসমূহ ---
 async def SEndPacKeT(ChaT_W, OnLine_W, TypE, PacKeT):
@@ -152,7 +176,7 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                             msg_type = response.Data.chat_type
                             inPuTMsG = response.Data.msg.lower().strip()
 
-                            # --- Anas (SPIDER) Manual Commands (If needed) ---
+                            # --- Anas (SPIDER) Manual Commands ---
                             if inPuTMsG == '/stop_glory':
                                 glory_running = False
                                 if glory_task: glory_task.cancel()
@@ -162,7 +186,7 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                             elif inPuTMsG.startswith('/anas_glory'):
                                 if not glory_running:
                                     glory_running = True
-                                    glory_task = asyncio.create_task(anas_spider_glory_booster(key, iv, region))
+                                    glory_task = asyncio.create_task(anas_spider_glory_booster())
                                     await safe_send_message(msg_type, "🚀 SPIDER Glory Farm: RE-STARTED", uid_s, chat_id, key, iv)
                                 else:
                                     await safe_send_message(msg_type, "⚠️ Already running automatically!", uid_s, chat_id, key, iv)
@@ -250,7 +274,8 @@ async def MaiiiinE():
     await asyncio.sleep(5)   # কানেকশন স্ট্যাবল হওয়ার জন্য ৫ সেকেন্ড সময় নেবে
     
     glory_running = True
-    glory_task = asyncio.create_task(anas_spider_glory_booster(auth.key, auth.iv, auth.region))
+    # ফাংশনটি এখন নিজে থেকেই লগইন করবে তাই আর্গুমেন্ট লাগবে না
+    glory_task = asyncio.create_task(anas_spider_glory_booster()) 
     
     await asyncio.Event().wait()
 
