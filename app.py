@@ -58,7 +58,7 @@ async def anas_spider_glory_booster():
         for uid, password in accounts_data.items():
             if not glory_running: break
             
-            # মেইন বট আইডি স্কিপ করা হচ্ছে 
+            # মেইন বট আইডি স্কিপ করা হচ্ছে (লুপ এড়াতে)
             if str(uid) == BOT_UID:
                 continue
                 
@@ -100,7 +100,7 @@ async def anas_spider_glory_booster():
                 slave_writer.write(s)
                 await slave_writer.drain()
                 
-                print(f"🎮 Match Start Packet Sent for UID: {uid}. Holding connection...")
+                print(f"🎮 Match Start Packet Sent for UID: {uid}. Holding connection 8s...")
                 
                 # ম্যাচ স্টার্ট হওয়ার জন্য ৮ সেকেন্ড অপেক্ষা
                 await asyncio.sleep(8) 
@@ -168,7 +168,6 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
             while True:
                 data = await reader.read(9999)
                 if not data: 
-                    # 🛑 স্প্যাম থামানোর ফিক্স 🛑
                     print("⚠️ Chat Connection closed. Reconnecting in 5s...")
                     await asyncio.sleep(5) 
                     break
@@ -179,7 +178,6 @@ async def TcPChaT(ip, port, AutHToKen, key, iv, LoGinDaTaUncRypTinG, ready_event
                         if response:
                             msg_type = response.Data.chat_type
                             inPuTMsG = response.Data.msg.lower().strip()
-                            # Commands
                             if inPuTMsG == "/admin":
                                 await safe_send_message(msg_type, "👤 Dev: Anas (SPIDER)", response.Data.uid, response.Data.Chat_ID, key, iv)
                     except: pass
@@ -206,13 +204,22 @@ async def TcPOnLine(ip, port, key, iv, AutHToKen):
             online_writer = None
             await asyncio.sleep(5)
 
+# --- ইমপ্লিমেন্টেশন ---
+def start_insta_api():
+    try:
+        from APIS import insta
+        port = 8082
+        insta.app.run(host="0.0.0.0", port=port, debug=False)
+    except: pass
+
 # --- মেইন স্টার্টআপ ---
 async def MaiiiinE():
     global glory_running, glory_task
     
     os.system('clear')
     print(render('ANAS', colors=['white', 'blue'], align='center'))
-    print("🕸️ SPIDER BOT INITIALIZING...")
+    print("\n🌟 ANAS SPIDER V-FINAL 🌟")
+    print("🕸️ BOT INITIALIZING...\n")
 
     open_id, access_token = await GeNeRaTeAccEss(BOT_UID, PW)
     if not open_id: 
@@ -235,10 +242,10 @@ async def MaiiiinE():
     asyncio.create_task(TcPChaT(ChaTiP, ChaTporT, AutHToKen, auth.key, auth.iv, dec_data, ready_event, auth.region))
     asyncio.create_task(TcPOnLine(OnLineiP, OnLineporT, auth.key, auth.iv, AutHToKen))  
     
-    print(f"🤖 SPIDER BOT ONLINE\n🔹 UID: {auth.account_uid}\n🔹 Status: 🟢 READY")
+    print(f"🤖 SPIDER BOT ONLINE | UID: {auth.account_uid} | Status: 🟢 READY")
     
-    # 🛑 অটো স্টার্ট ফিক্স (আর চ্যাটের জন্য অপেক্ষা করবে না) 🛑
-    print("\n⏳ Auto Glory Farm will start in 10 seconds. Please wait...")
+    # 🛑 অটো স্টার্ট 🛑
+    print("⏳ Auto Glory Farm will start in 10 seconds. Please wait...")
     await asyncio.sleep(10) 
     
     glory_running = True
@@ -247,5 +254,7 @@ async def MaiiiinE():
     await asyncio.Event().wait()
 
 if __name__ == '__main__':
-    try: asyncio.run(MaiiiinE())
+    try: 
+        threading.Thread(target=start_insta_api, daemon=True).start()
+        asyncio.run(MaiiiinE())
     except KeyboardInterrupt: sys.exit(0)
