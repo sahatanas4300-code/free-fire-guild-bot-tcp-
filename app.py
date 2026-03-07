@@ -18,7 +18,38 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import random
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+import threading
+
+# লুপ কন্ট্রোল করার জন্য গ্লোবাল ভেরিয়েবল
+glory_running = False 
+
+def anas_spider_glory_booster(clan_id="3063703446"):
+    global glory_running
+    all_ids = load_accounts()[:16] # ১৬টি আইডি লোড
+    
+    # ধাপ ১: গিল্ড রিকোয়েস্ট পাঠানো
+    for account in all_ids:
+        if not glory_running: break # স্টপ কমান্ড দিলে লুপ ভেঙে যাবে
+        send_guild_request(account, clan_id)
+        time.sleep(2)
+
+    # ধাপ ২: সিএস ফার্মিং লুপ
+    while glory_running: 
+        for i in range(0, 16, 4):
+            if not glory_running: break
+            
+            squad = all_ids[i:i+4]
+            leader = squad[0]
+            
+            # গ্রুপ তৈরি ও সিএস স্টার্ট লজিক
+            create_squad(leader)
+            for member in squad[1:]:
+                invite_to_squad(leader, member)
+            
+            send_start_packet(leader, mode="CS")
+            
+            print(f"🎮 Group {int(i/4)+1} Started. Waiting 60s...")
+            time.sleep(60) # আপনার রিকুয়েস্ট করা ১ মিনিটের গ্যাপ
 
 
 
