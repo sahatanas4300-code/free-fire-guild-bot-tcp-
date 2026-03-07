@@ -9,55 +9,43 @@ from Pb2 import DEcwHisPErMsG_pb2 , MajoRLoGinrEs_pb2 , PorTs_pb2 , MajoRLoGinrE
 from cfonts import render, say
 from APIS import insta
 from flask import Flask, jsonify, request
-import asyncio
-import signal
-import sys
-# Add these imports if not already present
-import re
+import asyncio, signal, random, threading
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
-import random
-from Crypto.Cipher import AES
-import threading
 
-# লুপ কন্ট্রোল করার জন্য গ্লোবাল ভেরিয়েবল
+# --- Anas (SPIDER) Global Variables ---
 glory_running = False 
+glory_task = None
 
-def anas_spider_glory_booster(clan_id="3063703446"):
+async def anas_spider_glory_booster():
     global glory_running
-    all_ids = load_accounts()[:16] # ১৬টি আইডি লোড
+    # accounts.json থেকে ১৬টি আইডি লোড করা
+    accounts = multi_account_manager.load_accounts()
+    uids = list(accounts.keys())[:16] 
+    clan_id = "3063703446"
     
     # ধাপ ১: গিল্ড রিকোয়েস্ট পাঠানো
-    for account in all_ids:
-        if not glory_running: break # স্টপ কমান্ড দিলে লুপ ভেঙে যাবে
-        send_guild_request(account, clan_id)
-        time.sleep(2)
+    for target_uid in uids:
+        if not glory_running: break
+        # আপনার xC4 ফাইল থেকে ফাংশন কল করা হবে
+        await SEnd_InV(5, int(target_uid), key, iv, region) 
+        await asyncio.sleep(2)
 
-    # ধাপ ২: সিএস ফার্মিং লুপ
+    # ধাপ ২: সিএস ফার্মিং লুপ (১ মিনিটের গ্যাপ সহ)
     while glory_running: 
         for i in range(0, 16, 4):
             if not glory_running: break
+            squad_uids = uids[i:i+4]
+            leader_uid = squad_uids[0]
             
-            squad = all_ids[i:i+4]
-            leader = squad[0]
-            
-            # গ্রুপ তৈরি ও সিএস স্টার্ট লজিক
-            create_squad(leader)
-            for member in squad[1:]:
-                invite_to_squad(leader, member)
-            
-            send_start_packet(leader, mode="CS")
+            # আপনার কোডের ফাংশন অনুযায়ী সিএস স্টার্ট প্যাকেট
+            await OpEnSq(key, iv, region)
+            await cHSq(4, int(leader_uid), key, iv, region)
+            await FS(key, iv) # FS মানে হলো Start Match
             
             print(f"🎮 Group {int(i/4)+1} Started. Waiting 60s...")
-            time.sleep(60) # আপনার রিকুয়েস্ট করা ১ মিনিটের গ্যাপ
+            await asyncio.sleep(60)
 
-
-
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  
-
-# VariabLes dyli 
-#------------------------------------------#
 online_writer = None
 whisper_writer = None
 spam_room = False
