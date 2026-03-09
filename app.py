@@ -2,37 +2,41 @@ import json
 import asyncio
 import aiohttp
 import os
-import sys
+import random
 
-# মডিউল ইম্পোর্ট
+# xC4 theke dorkari jinish import kora
 try:
     from xC4 import EncRypTMajoRLoGin, MajorLogin, DecRypTMajoRLoGin, GetLoginData, DecRypTLoGinDaTa, xAuThSTarTuP, FS, OpEnSq, SEnd_InV, CrEaTe_ProTo, GeneRaTePk
 except ImportError:
-    print("❌ xC4.py মডিউল পাওয়া যায়নি!")
+    print("❌ xC4.py module paoa jayni!")
 
 ACCOUNTS_FILE = "accounts.json"
-REGION = "sg" # রিজিয়ন (ind, bd বা sg)
-CLAN_ID = "3063703446"
+REGION = "sg"
+CLAN_ID = "3063703446" # Apnar Guild ID
+
+async def Apply_Guild_Packet(uid, clan_id, K, V):
+    """Spam join packet structure"""
+    fields = {
+        1: 18,
+        2: {
+            1: int(clan_id),
+            2: "S M ROBOT",
+            11: int(uid)
+        }
+    }
+    return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex(), '0515', K, V)
 
 async def get_access_token(uid, password):
     url = "https://100067.connect.garena.com/oauth/guest/token/grant"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    data = {"uid": uid, "password": password, "response_type": "token", "client_type": "2", "client_secret": "2ee44819e9b4598845141067b281621874d0d5d7af9d8f7e00c1e54715b7d1e3", "client_id": "100067"}
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url, headers=headers, data=data, timeout=10) as resp:
-                if resp.status == 200:
-                    res = await resp.json()
-                    return res.get("open_id"), res.get("access_token")
-    except: pass
+    data = {"uid": uid, "password": password, "response_type": "token", "client_type": "2", "client_id": "100067"}
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=data) as resp:
+            if resp.status == 200:
+                res = await resp.json()
+                return res.get("open_id"), res.get("access_token")
     return None, None
 
-async def Apply_Guild_Packet(clan_id, K, V):
-    """গিল্ডে রিকোয়েস্ট পাঠানোর কাস্টম প্যাকেট"""
-    fields = {1: 18, 2: {1: int(clan_id)}} 
-    return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex(), '0515', K, V)
-
-async def process_bot(bot_info, action="apply", team_members=[]):
+async def process_bot(bot_info, action="apply"):
     uid = bot_info['uid']
     try:
         open_id, token = await get_access_token(uid, bot_info['pwd'])
@@ -40,8 +44,6 @@ async def process_bot(bot_info, action="apply", team_members=[]):
 
         PyL = await EncRypTMajoRLoGin(open_id, token)
         res = await MajorLogin(PyL)
-        if not res: return False
-
         auth = await DecRypTMajoRLoGin(res)
         LoGinDaTa = await GetLoginData(auth.url, PyL, auth.token)
         dec_data = await DecRypTLoGinDaTa(LoGinDaTa)
@@ -52,102 +54,33 @@ async def process_bot(bot_info, action="apply", team_members=[]):
         reader, writer = await asyncio.open_connection(OnLineiP, int(OnLineporT))
         writer.write(bytes.fromhex(AutHToKen))
         await writer.drain()
-        await asyncio.sleep(2) 
 
-                if action == "apply":
+        if action == "apply":
             req_packet = await Apply_Guild_Packet(uid, CLAN_ID, auth.key, auth.iv)
             writer.write(req_packet)
             await writer.drain()
-            print(f"📩 [{uid}] গিল্ডে জয়েন রিকোয়েস্ট পাঠিয়েছে!")
-
-            
-        elif action == "play":
-            if team_members: 
-                sq_packet = await OpEnSq(auth.key, auth.iv, REGION)
-                writer.write(sq_packet)
-                await writer.drain()
-                await asyncio.sleep(2)
-                
-                for mem in team_members:
-                    inv_packet = await SEnd_InV(1, mem['uid'], auth.key, auth.iv, REGION)
-                    writer.write(inv_packet)
-                    await writer.drain()
-                
-                print(f"🎮 [LEADER: {uid}] টিম রেডি করে ম্যাচ স্টার্ট দিচ্ছে!")
-            else:
-                print(f"👥 [MEMBER: {uid}] স্কোয়াডে জয়েন করার জন্য রেডি।")
-                
-            match_packet = await FS(auth.key, auth.iv)
-            writer.write(match_packet)
-            await writer.drain()
-            await asyncio.sleep(8) 
+            print(f"📩 [{uid}] Guild join request pathiyeche!")
 
         writer.close()
-        await writer.wait_closed()
         return True
-
-    except Exception as e:
-        return False
+    except: return False
 
 async def main():
-    os.system('clear' if os.name == 'posix' else 'cls')
-    print("="*55)
-    print("🕸️ SPIDER ADVANCED GLORY BOOSTER (AUTO REQUEST) 🕸️")
-    print("="*55)
-
-    if not os.path.exists(ACCOUNTS_FILE):
-        print("❌ accounts.json ফাইল নেই!")
-        return
-
-    # JSON ফাইল রিড করার নতুন লজিক (আপনার ফাইলের ফরম্যাট অনুযায়ী)
+    print("🕸️ SPIDER ADVANCED GLORY BOOSTER 🕸️")
     with open(ACCOUNTS_FILE, "r") as f:
-        accounts_data = json.load(f)
+        data = json.load(f)
+    
+    # Sudhu prothom 20ti bot nibe
+    bots = [{'uid': b['uid'], 'pwd': b['password']} for b in data[:20]]
 
-    all_bots = []
-    for bot in accounts_data:
-        u = str(bot.get("uid", ""))
-        p = bot.get("password", "")
-        # মেইন আইডিগুলো স্কিপ করা
-        if u and u not in ["4594650572", "14942629274", "13699776666", "14009897329"]:
-            all_bots.append({'uid': u, 'pwd': p})
+    print(f"\n🛡️ Dhap 1: {len(bots)}ti bot theke Guild request pathano hocche...")
+    await asyncio.gather(*[process_bot(b, "apply") for b in bots])
 
-    # ================= [ ধাপ ১: গিল্ড রিকোয়েস্ট ] =================
-    print(f"\n🛡️ ধাপ ১: {len(all_bots)} টি বট থেকে গিল্ড রিকোয়েস্ট পাঠানো হচ্ছে...")
-    tasks = [process_bot(bot, action="apply") for bot in all_bots]
-    await asyncio.gather(*tasks)
-
-    print("\n" + "="*55)
-    print(f"👑 মামা, সব বট থেকে {CLAN_ID} গিল্ডে রিকোয়েস্ট পাঠানো হয়েছে!")
-    print("👑 গেম ওপেন করে আপনার মেইন আইডি থেকে রিকোয়েস্টগুলো অ্যাকসেপ্ট করুন।")
-    print("="*55)
-
-    await asyncio.get_event_loop().run_in_executor(None, input, "\n👉 অ্যাকসেপ্ট করা শেষ হলে এখানে ENTER চাপুন (ম্যাচ স্টার্ট হবে)... ")
-
-    # ================= [ ধাপ ২: স্কোয়াড গ্লোরি ফার্মিং ] =================
-    print("\n🎮 ধাপ ২: স্কোয়াড তৈরি এবং গ্লোরি ফার্মিং শুরু হচ্ছে...\n")
-    teams = [all_bots[i:i+4] for i in range(0, len(all_bots), 4)]
-
-    round_num = 1
-    while True:
-        print(f"🔄 ======= রাউন্ড {round_num} =======")
-        for index, team in enumerate(teams):
-            leader = team[0]
-            members = team[1:]
-            
-            print(f"🚀 --- TEAM-{index+1} প্রসেসিং ---")
-            tasks = [process_bot(mem, action="play", team_members=[]) for mem in members]
-            tasks.append(process_bot(leader, action="play", team_members=members))
-            
-            await asyncio.gather(*tasks)
-            await asyncio.sleep(5)
-            
-        print(f"\n💤 রাউন্ড {round_num} শেষ। পরবর্তী রাউন্ড ৬০ সেকেন্ড পর...")
-        await asyncio.sleep(60)
-        round_num += 1
+    print("\n✅ Request pathano shesh! Game e giye Accept korun.")
+    input("\n👉 Accept kora shesh hole ENTER chapun (Match start hobe)...")
+    
+    print("\n🎮 Dhap 2: Glory farming shuru hocche...")
+    # Ekhane match start er logic thakbe...
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n🛑 বোটটি বন্ধ করা হয়েছে।")
-        sys.exit(0)
+    asyncio.run(main())
