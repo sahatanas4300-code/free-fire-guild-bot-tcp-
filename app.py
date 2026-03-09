@@ -19,23 +19,24 @@ ACCOUNTS_FILE = "accounts.json"
 CLAN_ID = "3063703446" # আপনার গিল্ড আইডি
 
 async def Apply_Guild_Packet(uid, clan_id, K, V):
-    """join_spam_manager.py এর অরিজিনাল লজিক অনুযায়ী জয়েন রিকোয়েস্ট"""
-    # বাংলাদেশ রিজিয়নের জন্য লেটেস্ট হেডার '0519'
-    packet_type = "0519" 
+    # '0519' এর বদলে '0515' ট্রাই করুন
+    packet_type = "0515" 
     
     fields = {
-        1: 33, # জয়েন রিকোয়েস্ট উইথ ব্যাজ অ্যাকশন
+        1: 33, 
         2: {
-            1: int(clan_id),      # গিল্ড আইডি
-            2: "BD",              # রিজিয়ন
-            13: int(clan_id),     # টার্গেট আইডি
+            1: int(clan_id),
+            2: "UAE", # রিজিয়ন UAE করে দিন
+            13: int(clan_id),
             27: {
                 1: 11,
-                2: int(uid),      # বটের নিজস্ব UID
-                3: 9999           # ব্যাজ ভ্যালু
+                2: int(uid),
+                3: 9999
             }
         }
     }
+    return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex(), packet_type, K, V)
+
     # প্রোটোবাফ ডাটা জেনারেট এবং এনক্রিপশন
     proto_data = await CrEaTe_ProTo(fields)
     return await GeneRaTePk(proto_data.hex(), packet_type, K, V)
