@@ -19,22 +19,22 @@ ACCOUNTS_FILE = "accounts.json"
 CLAN_ID = "3063703446" # আপনার গিল্ড আইডি
 
 async def Apply_Guild_Packet(uid, clan_id, K, V):
-    # '0519' এর বদলে '0515' ট্রাই করুন
-    packet_type = "0515" 
+    """গ্লোবাল হেডার 0515 এবং অ্যাকশন 18 ব্যবহার করে জয়েন রিকোয়েস্ট"""
+    packet_type = "0515" # গ্লোবাল/ইউএই হেডার
     
     fields = {
-        1: 33, 
+        1: 18, # সাধারণ গিল্ড জয়েন রিকোয়েস্ট
         2: {
-            1: int(clan_id),
-            2: "UAE", # রিজিয়ন UAE করে দিন
-            13: int(clan_id),
-            27: {
-                1: 11,
-                2: int(uid),
-                3: 9999
-            }
+            1: int(clan_id), # আপনার গিল্ড আইডি
+            2: "S M ROBOT",  # বটের নাম (ঐচ্ছিক)
+            11: int(uid)     # বটের নিজস্ব UID
         }
     }
+    
+    # প্যাকেট জেনারেট করা
+    proto_data = await CrEaTe_ProTo(fields)
+    return await GeneRaTePk(proto_data.hex(), packet_type, K, V)
+
     return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex(), packet_type, K, V)
 
     # প্রোটোবাফ ডাটা জেনারেট এবং এনক্রিপশন
