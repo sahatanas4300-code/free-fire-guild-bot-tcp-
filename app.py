@@ -29,11 +29,10 @@ async def get_access_token(uid, password):
 
 async def Apply_Guild_Packet(clan_id, K, V):
     """গিল্ডে রিকোয়েস্ট পাঠানোর কাস্টম প্যাকেট"""
-    fields = {1: 18, 2: {1: int(clan_id)}} # Garena Clan Apply Action
+    fields = {1: 18, 2: {1: int(clan_id)}} 
     return await GeneRaTePk((await CrEaTe_ProTo(fields)).hex(), '0515', K, V)
 
 async def process_bot(bot_info, action="apply", team_members=[]):
-    """এই ফাংশনটি রিকোয়েস্ট পাঠানো এবং গেম খেলা—দুটি কাজই করবে"""
     uid = bot_info['uid']
     try:
         open_id, token = await get_access_token(uid, bot_info['pwd'])
@@ -55,22 +54,19 @@ async def process_bot(bot_info, action="apply", team_members=[]):
         await writer.drain()
         await asyncio.sleep(2) 
 
-        # --- লজিক ১: গিল্ডে রিকোয়েস্ট পাঠানো ---
         if action == "apply":
             req_packet = await Apply_Guild_Packet(CLAN_ID, auth.key, auth.iv)
             writer.write(req_packet)
             await writer.drain()
             print(f"📩 [{uid}] গিল্ডে জয়েন রিকোয়েস্ট পাঠিয়েছে!")
             
-        # --- লজিক ২: স্কোয়াড ও ম্যাচ স্টার্ট ---
         elif action == "play":
-            if team_members: # যদি লিডার হয়
+            if team_members: 
                 sq_packet = await OpEnSq(auth.key, auth.iv, REGION)
                 writer.write(sq_packet)
                 await writer.drain()
                 await asyncio.sleep(2)
                 
-                # মেম্বারদের ইনভাইট দেওয়া
                 for mem in team_members:
                     inv_packet = await SEnd_InV(1, mem['uid'], auth.key, auth.iv, REGION)
                     writer.write(inv_packet)
@@ -80,7 +76,6 @@ async def process_bot(bot_info, action="apply", team_members=[]):
             else:
                 print(f"👥 [MEMBER: {uid}] স্কোয়াডে জয়েন করার জন্য রেডি।")
                 
-            # সবাই ম্যাচ স্টার্ট (FS) প্যাকেট পাঠাবে গ্লোরি কনফার্ম করতে
             match_packet = await FS(auth.key, auth.iv)
             writer.write(match_packet)
             await writer.drain()
@@ -103,10 +98,17 @@ async def main():
         print("❌ accounts.json ফাইল নেই!")
         return
 
+    # JSON ফাইল রিড করার নতুন লজিক (আপনার ফাইলের ফরম্যাট অনুযায়ী)
     with open(ACCOUNTS_FILE, "r") as f:
-        accounts_dict = json.load(f)
+        accounts_data = json.load(f)
 
-    all_bots = [{'uid': u, 'pwd': p} for u, p in accounts_dict.items() if str(u) not in ["4594650572", "14942629274"]]
+    all_bots = []
+    for bot in accounts_data:
+        u = str(bot.get("uid", ""))
+        p = bot.get("password", "")
+        # মেইন আইডিগুলো স্কিপ করা
+        if u and u not in ["4594650572", "14942629274", "13699776666", "14009897329"]:
+            all_bots.append({'uid': u, 'pwd': p})
 
     # ================= [ ধাপ ১: গিল্ড রিকোয়েস্ট ] =================
     print(f"\n🛡️ ধাপ ১: {len(all_bots)} টি বট থেকে গিল্ড রিকোয়েস্ট পাঠানো হচ্ছে...")
@@ -118,11 +120,10 @@ async def main():
     print("👑 গেম ওপেন করে আপনার মেইন আইডি থেকে রিকোয়েস্টগুলো অ্যাকসেপ্ট করুন।")
     print("="*55)
 
-    # আপনার জন্য অপেক্ষা করবে
     await asyncio.get_event_loop().run_in_executor(None, input, "\n👉 অ্যাকসেপ্ট করা শেষ হলে এখানে ENTER চাপুন (ম্যাচ স্টার্ট হবে)... ")
 
     # ================= [ ধাপ ২: স্কোয়াড গ্লোরি ফার্মিং ] =================
-    print("\n🎮 ধাপ ২: ৫টি টিম তৈরি এবং গ্লোরি ফার্মিং শুরু হচ্ছে...\n")
+    print("\n🎮 ধাপ ২: স্কোয়াড তৈরি এবং গ্লোরি ফার্মিং শুরু হচ্ছে...\n")
     teams = [all_bots[i:i+4] for i in range(0, len(all_bots), 4)]
 
     round_num = 1
