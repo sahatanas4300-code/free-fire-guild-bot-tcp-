@@ -54,11 +54,12 @@ async def process_bot(bot_info, action="apply", team_members=[]):
         await writer.drain()
         await asyncio.sleep(2) 
 
-        if action == "apply":
-            req_packet = await Apply_Guild_Packet(CLAN_ID, auth.key, auth.iv)
+                if action == "apply":
+            req_packet = await Apply_Guild_Packet(uid, CLAN_ID, auth.key, auth.iv)
             writer.write(req_packet)
             await writer.drain()
             print(f"📩 [{uid}] গিল্ডে জয়েন রিকোয়েস্ট পাঠিয়েছে!")
+
             
         elif action == "play":
             if team_members: 
